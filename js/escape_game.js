@@ -580,10 +580,10 @@ function hint() {
                 $('.hint_a003').find('.hint_text').text('文字の色を英語(アルファベット)にしたときの何文字目かを示しています。答えの人物はこの地図のどこかにいますよね。');
             }
             if ( $(this).hasClass('hint_a004_1') ) {
-                $('.hint_a004_1').find('.hint_text').text('タルは合計で3つあります。1階も見てくださいね。');
+                $('.hint_a004_1').find('.hint_text').text('学者とは ハント と ローレン のことです。ハントのエモーションの内のどれかが答えです。');
             }
             if ( $(this).hasClass('hint_a004_2') ) {
-                $('.hint_a004_2').find('.hint_text').text('ミニオン同士を線で結ぶといいかもしれません。');
+                $('.hint_a004_2').find('.hint_text').text('ローレンが見ているホワイトボードの化学式を使います。');
             }
             if ( $(this).hasClass('hint_a005_1') ) {
                 $('.hint_a005_1').find('.hint_text').text('三桁+三桁の計算で答えが四桁になっているので、△は「1」で確定します。');
