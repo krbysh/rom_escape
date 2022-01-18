@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="jp">
+
+<!--
+ここには、ヒントも答えもないよ！
+プログラム読めるとバレちゃうけどそっ閉じしてね。
+https://www.youtube.com/watch?v=Aop5XvjSipc
+ -->
+<head>
+    <title>ラグマス脱出ゲーム 禁忌の研究を阻止せよ</title>
+    <meta charset="utf-8">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <script type="text/javascript" src="./js/fastclick.js"></script>
+<!--    <script type="text/javascript" src="./js/common.js"></script>
+-->
+    <script type="text/javascript" src="./js/jquery.cookie.js" charset="UTF-8"></script>
+    <script type="text/javascript" src="./js/escape_game.js"></script>
+    <script type="text/javascript" src="./js/jquery.socialbutton-1.9.1.min.js"></script>
+    <link href="./css/new_general.css" rel="stylesheet" type="text/css">
+
+</head>
+
+<body>
+<div id="view_container">
+
+<style>
+    #stage {
+        background: rgba(0,0,0,0.9);
+    }
+    .drag-and-drop {
+        /* cursor: move; */
+        position: absolute;
+        z-index: 1000;
+    }
+    .cursor_move {
+        cursor: move
+    }
+    .drag {
+        z-index: 1001;
+    }
+    * {
+        user-select: none;
+        font-family: "Trebuchet MS", arial, helvetica, Sans-Serif;
+    }
+    .commonBox {
+        display: inline-block;
+        border: 1px solid #888;
+        border-radius: 10px;
+        background: rgba(0,0,0,0.5);
+        padding: 10px;
+    }
+    .color_fc0 {
+        color: #fc0;
+    }
+    .notice_icon {
+        vertical-align: top;
+    }
+    .navi_text {
+        position: relative;
+        display: inline-block;
+        border: 1px solid #888;
+        border-radius: 10px;
+        background: #000;
+        padding: 10px;
+        vertical-align: top;
+    }
+    .navi_text:before {
+        content: "";
+        position: absolute;
+        top: 5px;
+        left: -16px;
+        width: 0;
+        height: 0;
+        border-style: solid;
+        border-width: 6px 15px 6px 0;
+        border-color: transparent #888 transparent transparent;
+    }
+    .navi_text:after {
+        content: "";
+        position: absolute;
+        top: 5px;
+        left: -14px;
+        width: 0;
+        height: 0;
+        border-style: solid;
+        border-width: 6px 15px 6px 0;
+        border-color: transparent #000 transparent transparent;
+    }
+    .answer_layout {
+        display: none;
+        margin: 0px auto;
+    }
+    .answer_layout td {
+        vertical-align: top;
+    }
+    .answer_form {
+        font-size: 27px;
+        text-align: center;
+        margin-right: 10px;
+    }
+    .answer_ng {
+        display: none;
+        text-align: center;
+    }
+    .goto_next_btn {
+        display: block;
+        border: 1px solid #fc0;
+        border-radius: 10px;
+        background: rgba(0,0,0,0.5);
+        margin: 0px auto;
+        padding: 10px;
+        color: #fc0;
+        width: 250px;
+        text-align: center;
+        font-weight: bold;
+    }
+    .goto_next_btn:hover {
+        background: rgba(255,204,0,0.5);
+        color: #000;
+    }
+    .layout_box {
+        display: block;
+        position: relative;
+    }
+    #a002 .layout_box img,
+    #a003 .layout_box img,
+    #a004 .layout_box img,
+    #a005 .layout_box img,
+    #a006 .layout_box img,
+    #a007 .layout_box img,
+    #a008 .layout_box img,
+    #a009 table,
+    #a010 table,
+    #a011 table,
+    #a012 table,
+    #a013 table {
+        display: none;
+    }
+    .layout_box .block_layer {
+        display: inline-block;
+        position: absolute;
+        top: 0px;
+        left: 0px;
+        z-index: 2000;
+    }
+    .layout_0 ,
+    .layout_0 .block_layer {
+        width: 700px;
+        height: 100px;
+    }
+    .layout_1 ,
+    .layout_1 .block_layer,
+    .layout_1 img {
+        width: 640px;
+        height: 440px;
+    }
+    .layout_2 ,
+    .layout_2 .block_layer {
+        width: 400px;
+        height: 285px;
+    }
+    .ma0a {
+        margin: 0px auto;
+    }
+     #a002,#a003,#a004,#a005,#a006,#a007,#a008 {
+        display: none;
+    }
+    #a009,#a010,#a011,#a012,#a013 {
+        display: none;
+    }
+    #count_down {
+        display: none;
+        position: fixed;
+        bottom: 70px;
+        right: 20px;
+        background: rgba(0,0,0,0.8);
+        width: 100px;
+        text-align: center;
+        border: 1px solid #888;
+        border-radius: 3px;
+        font-size: 20px;
+        z-index: 3000;
+    }
+    #count_down p {
+        font-size: 20px;
+    }
+    #count_down.red {
+        border: 1px solid #f00;
+    }
+    #count_down.fc0 {
+        border: 1px solid #fc0;
+    }
+    #count_down.green {
+        border: 1px solid #0a8;
+    }
+    .tornade {
+        -webkit-animation: spin 0.5s linear infinite;
+        -moz-animation: spin 0.5s linear infinite;
+        -ms-animation: spin 0.5s linear infinite;
+        -o-animation: spin 0.5s linear infinite;
+        animation: spin 0.5s linear infinite;
+    }
+    .math_checker td {
+        width: 105px;
+        vertical-align: middle;
+    }
+    .math_checker td div {
+        display: inline-block;
+    }
+    .math_checker input {
+        width: 60px;
+        text-align: center;
+    }
+    .math_check_btn:hover {
+        background: #fc0;
+        color: #000;
+    }
+    .math_check_btn.disable {
+        background: #888;
+        color: #000;
+        cursor: default;
+    }
+    @-webkit-keyframes spin {
+        0%   {-webkit-transform: rotate(0deg);}
+        100% {-webkit-transform: rotate(360deg);}
+    }
+    @-moz-keyframes spin {
+        0%   {-moz-transform: rotate(0deg);}
+        100% {-moz-transform: rotate(360deg);}
+    }
+    @-ms-keyframes spin {
+        0%   {-ms-transform: rotate(0deg);}
+        100% {-ms-transform: rotate(360deg);}
+    }
+    @-o-keyframes spin {
+        0%   {-o-transform: rotate(0deg);}
+        100% {-o-transform: rotate(360deg);}
+    }
+    @keyframes spin {
+        0%   {transform: rotate(0deg);}
+        100% {transform: rotate(360deg);}
+    }
+    .hint_icon {
+        display: inline-block;
+        width: 15px;
+        height: 15px;
+    }
+    .hint_text {
+        display: inline-block;
+    }
+    .hint_icon.lock {
+        background: url('./img/escape_game/hint_lock.png');
+        background-size: 15px;
+    }
+    .hint_icon.unlock {
+        background: url('./img/escape_game/hint_unlock.png');
+        background-size: 15px;
+    }
+</style>
+
+    <div id="header">
+        <div id="menu">
+        </div>
+    </div>
+
+    <div id="stage">
+        <span class="color_red">
+            テストプレイ<br>
+        </span>
+        <br>
+        <br>
+        脱出ゲーム「禁忌の研究を阻止せよ」
+        <p class="tweet_button"></p><br>
+        <!--<img class="ma0a" style="display:block;" src="./img/escape_game/title_logo.png" width="700">-->
+        <hr>
+        <br>
+
+        <article id="count_down">
+            <div class="clear color_green">脱出成功!</div>
+            <div class="timeUp color_red">脱出失敗!</div>
+            <div class="timer"><p id="min">90</p>:<p id="sec">00</p></div>
+        </article>
+
+        <article id="a001">
+            当ページは、ラグマスゲーム内と連動した<p class="color_fc0">脱出ゲーム</p>です。<br>
+            挑戦される方は、以下の準備をお願いいたします。<br>
+            <br>
+            <table>
+                <tr>
+                    <td style="vertical-align:top; width:100%;">
+                        <div class="commonBox">
+                            <img class="notice_icon" src="./img/escape_game/icon_001.png" width="16">
+                            <p class="color_fc0">事前準備</p><br>
+                            <hr>
+                            <p class="color_fc0">1) ラグマスにキャラを作成してください。</p><br>
+                             ・ リヒタルゼンエリアのマップを使用します。<br>
+                             ・ キャラクターは Lv1 でも問題なくご参加いただけます。<br>
+                            <p class="color_fc0">2) メモをご用意ください。</p><br>
+                             ・ 問題を解くためにメモしたりする必要がございます。<br>
+                        </div>
+                        <br><br>
+
+                        <div class="commonBox">
+                            <img class="notice_icon" src="./img/escape_game/icon_001.png" width="16">
+                            <p class="color_fc0">注意事項</p><br>
+                            <hr>
+                            ・ 過度な期待はしないでください。<br>
+                            ・ 任意のタイミングで開始してください。<br>
+                            ・ 本ゲームはお一人でもご参加いただけます。<br>
+                            ・ 友人同士の競争プレイ/協力プレイも楽しいかもしれません。<br>
+                            ・ ご自由なスタイルでお楽しみください。<br>
+                            ・ プレイ時間は、約 90 分 を想定しています。<br>
+                            ・ 時間経過でヒントがアンロックされます。クリックで表示されます。<br>
+                            ・ ヒントを見たくない方はクリックしなければ開示されません。<br>
+                            ・ 電卓使用可です。<br>
+                            ・ 最終問題以外は何回でも答えられます。<br>
+                        </div>
+                        <br><br>
+
+                        <div class="commonBox">
+                            <img class="notice_icon" src="./img/escape_game/icon_001.png" width="16">
+                            <p class="color_fc0">禁止事項</p><br>
+                            <hr>
+                            ・ 他のユーザーさんの迷惑になるような行為はお控えください。<br>
+                            ・ プログラム内を覗く行為はお控えください。<br>
+                            ・ 答え、ヒント、ネタバレ等を SNS 等で拡散しないでください。<br>
+                        </div>
+                        <br><br>
+
+                        ここまでで準備完了となります。<br>
+                        準備が完了し、挑戦される方は次へお進みください。<br>
+                        <p class="color_fc0">下記のボタンをクリックすると、脱出ゲームがスタートします。</p>
+                    </td>
+                    <td style="vertical-align:top">
+                        <iframe width="430" height="315" src="https://www.youtube.com/embed/Aop5XvjSipc" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                    <!--
+                        <img src="./img/escape_game/image_001.png" width="400">
+                        <img src="./img/escape_game/image_002.png" width="400">
+                    -->
+                    </td>
+                </tr>
+            </table>
+            <br>
+
+            <a id="open_a002" class="goto_next_btn" href="javascript:void(0)">準備完了、ゲームを始める。</a>
+            <br>
+        </article>
+
+        <article id="a002">
+            <div style="width:900px;">
+                <img src="./img/escape_game/image_navi.png" width="160">
+                <div class="navi_text">
+                    <div id="text_001">はじめまして、冒険者さん。</div>
+                    <div id="text_002">今回、禁忌の研究を阻止するのに協力してくれる冒険者さんですね。</div>
+                    <div id="text_003">私は武器商人の ボルトン と申します。</div>
+                    <div id="text_004">武器商人は仮の姿でして、レッケンベル社の禁忌の研究を阻止するために仕事をしています。</div>
+                    <div id="text_005">最近、レッケンベル社のマッドサイエンティスト ボルセブ が疑似ユミルの心臓の創造に成功したようでして…。</div>
+                    <div id="text_006">冒険者さんにご協力いただき、禁忌の研究を阻止するために、呪文の解読をしていただきたいのです。</div>
+                    <div id="text_007">いつもこの時間 ボルゼブ は留守なので、帰宅するまでの 90 分間で、どうにか呪文の解読をお願いいたします。</div>
+                    <div id="text_008">　</div>
+                    <div id="text_009">まずは冒険者さんの実力を試させてください。 こちらのメモが解読できますか？</div>
+                </div>
+            </div>
+            <div class="hint_layout">
+                <a class="hint hint_a002" href="javascript:void(0)"><div class="hint_icon lock"></div><div class="hint_text">ヒント (82:00にアンロック)</div></a><br>
+            </div>
+            <br>
+            <div class="layout_box layout_1 ma0a">
+                <img class="drag-and-drop" src="./img/escape_game/a002.png">
+                <div class="block_layer"></div>
+            </div>
+            <br>
+            <table class="answer_layout">
+                <tr>
+                    <td class="center"><input type="text" id="answer_a002" class="answer_form" value="ダミー"></td>
+                    <td>
+                        <a id="open_a003" class="goto_next_btn" href="javascript:void(0)">答える</a>
+                        <div class="answer_ng">どうやら…違うようです…</div>
+                    </td>
+                </tr>
+            </table>
+            <br>
+        </article>
+
+        <article id="a003">
+            <hr><br>
+            <div style="width:900px;">
+                <img src="./img/escape_game/image_navi.png" width="160">
+                <div class="navi_text">
+                    <div id="text_011">正解でございます、冒険者さん！ 盗聴されないように、もう少し私の傍に来てください。</div>
+                    <div id="text_012">答えは セシル・ディモン になるのですね。「魔弾の射手」の二つ名を持つ彼女ですら人体実験対象にされているとか…。</div>
+                    <div id="text_013">あっ！！？？</div>
+                    <div id="text_014">どうやら、次の手掛かりになるメモの一部を射抜かれてしまいました…。</div>
+                    <div id="text_015">ここは、レッケンベル社の研究所からそう遠くないため、いつどこで監視されているかわかりません…。</div>
+                    <div id="text_016">ただ、人間の力では到底矢は届かない距離だとは思うのですが…。</div>
+                    <div id="text_017">冒険者さんも細心の注意を払い、調査を進めてください。</div>
+                    <div id="text_018">　</div>
+                    <div id="text_019">メモはレッケンベル社のトビラを開くカギなのですが… なんとか解読をお願い出来ますでしょうか……？</div>
+                </div>
+            </div>
+            <div class="hint_layout">
+                <a class="hint hint_a003" href="javascript:void(0)"><div class="hint_icon lock"></div><div class="hint_text">ヒント (74:00にアンロック)</div></a><br>
+            </div>
+            <br>            <div class="layout_box layout_1 ma0a">
+                <img class="drag-and-drop" src="./img/escape_game/a003.png">
+                <div class="block_layer"></div>
+            </div>
+            <br>
+            <table class="answer_layout">
+                <tr>
+                    <td class="center"><input type="text" id="answer_a003" class="answer_form" value="ダミー"></td>
+                    <td>
+                        <a id="open_a004" class="goto_next_btn" href="javascript:void(0)">答える</a>
+                        <div class="answer_ng">どうやら…違うようです…</div>
+                    </td>
+                </tr>
+            </table>
+            <br>
+        </article>
+
+        <article id="a004">
+            <hr><br>
+            <div style="width:900px;">
+                <img src="./img/escape_game/image_navi.png" width="160">
+                <div class="navi_text">
+                    <div id="text_021">冒険者さん、流石でございます！</div>
+                    <div id="text_022">なるほど、答えは カミラ ですね。</div>
+                    <div id="text_023">彼女は、一番下っ端の研究者ではあるけれど、レッケンベル社の中に入れてくれるはずです。</div>
+                    <div id="text_024">　</div>
+                    <div id="text_025">レッケンベル社の中には研究所があるはずですが、まずはその入口を探さないといけません。</div>
+                    <div id="text_026">きっとこの近くにあると思うのですが…。</div>
+                    <div id="text_027">　</div>
+                    <div id="text_028">以前、このようなメモを拾ったのですが、手がかりになりますでしょうか？</div>
+                    <div id="text_029">何かエモーションをする必要がありそうです……。</div>
+                </div>
+            </div>
+            <div class="hint_layout">
+                <a class="hint hint_a004_1" href="javascript:void(0)"><div class="hint_icon lock"></div><div class="hint_text">ヒント1 (66:00にアンロック)</div></a><br>
+                <a class="hint hint_a004_2" href="javascript:void(0)"><div class="hint_icon lock"></div><div class="hint_text">ヒント2 (58:00にアンロック)</div></a><br>
+            </div>
+            <br>
+            <div class="layout_box layout_1 ma0a">
+                <img class="drag-and-drop" src="./img/escape_game/a004.png">
+                <div class="block_layer"></div>
+            </div>
+            <br>
+            <table class="answer_layout">
+                <tr>
+                    <td colspan="2" class="center color_red">エモーションの名前を入力しよう</td>
+                </tr>
+                <tr>
+                    <td class="center"><input type="text" id="answer_a004" class="answer_form" value="居眠りする"></td>
+                    <td>
+                        <a id="open_a005" class="goto_next_btn" href="javascript:void(0)">答える</a>
+                        <div class="answer_ng">どうやら…違うようです…</div>
+                    </td>
+                </tr>
+            </table>
+            <br>
+        </article>
+
+        <article id="a005">
+            <hr><br>
+            <div style="width:900px;">
+                <img src="./img/escape_game/image_navi.png" width="160">
+                <div class="navi_text">
+                    <div id="text_031">ひゃあ！？ (…なんだったんだべ、壁に吸い込まれたべさ！！？？)</div>
+                    <div id="text_032"> </div>
+                    <div id="text_033">こんなところに隠し部屋があるなんて……。 思わず驚いてしまいました。</div>
+                    <div id="text_034">ちなみに棚の上から元の部屋に戻れるようです。</div>
+                    <div id="text_035"> </div>
+                    <div id="text_036">本当の研究部屋はここだったのですね……。 どうりで姿が消えたように見えるわけです。</div>
+                    <div id="text_037">蔵書もたくさんあって、どれから調べればよいのか……。</div>
+                    <div id="text_038">……おや？ テーブルの上にメモが置いてあるようですね。</div>
+                    <div id="text_039">私は隠し部屋内を調べますので、冒険者様はこちらのメモを解読お願いいたします。</div>
+                </div>
+            </div>
+            <div class="hint_layout">
+                <a class="hint hint_a005_1" href="javascript:void(0)"><div class="hint_icon lock"></div><div class="hint_text">ヒント1 (50:00にアンロック)</div></a><br>
+                <a class="hint hint_a005_2" href="javascript:void(0)"><div class="hint_icon lock"></div><div class="hint_text">ヒント2 (42:00にアンロック)</div></a><br>
+            </div>
+            <br>
+            <div class="layout_box layout_1 ma0a">
+                <img class="drag-and-drop" src="./img/escape_game/a005.png">
+                <div class="block_layer"></div>
+            </div>
+            <br>
+            <table class="answer_layout">
+                <tr>
+                    <td class="center"><input type="text" id="answer_a005" class="answer_form" value="クリスタル"></td>
+                    <td>
+                        <a id="open_a006" class="goto_next_btn" href="javascript:void(0)">答える</a>
+                        <div class="answer_ng">どうやら…違うようです…</div>
+                    </td>
+                </tr>
+            </table>
+            <br>
+        </article>
+
+        <article id="a006">
+            <hr><br>
+            <div style="width:900px;">
+                <img src="./img/escape_game/image_navi.png" width="160">
+                <div class="navi_text">
+                    <div id="text_041">冒険者様、解読ありがとうございます！ </div>
+                    <div id="text_042">先ほどのメモは クリスタル を指していたのですね！</div>
+                    <div id="text_043">そういえば…… えーっと…… あ、ありました！</div>
+                    <div id="text_044"> </div>
+                    <div id="text_045">隠し部屋内を調べていたところ、クリスタルに関する書物があったのです！</div>
+                    <div id="text_046">きっとこの中に何か手がかりが…… おや。</div>
+                    <div id="text_047"> </div>
+                    <div id="text_048">クリスタルに関する書物の中から、一枚のメモが見つかりました。</div>
+                    <div id="text_049">これも暗号のようですね……「使われていないものこそ大事」……これ主の口癖ですね…</div>
+                </div>
+            </div>
+            <div class="hint_layout">
+                <a class="hint hint_a006_1" href="javascript:void(0)"><div class="hint_icon lock"></div><div class="hint_text">ヒント1 (34:00にアンロック)</div></a><br>
+                <a class="hint hint_a006_2" href="javascript:void(0)"><div class="hint_icon lock"></div><div class="hint_text">ヒント2 (26:00にアンロック)</div></a><br>
+            </div>
+            <br>
+            <div class="layout_box layout_1 ma0a">
+                <img class="drag-and-drop" src="./img/escape_game/a006.png">
+                <div class="block_layer"></div>
+            </div>
+            <br>
+            <table class="answer_layout math_checker">
+                <tr>
+                    <td>A <input type="text" class="a006_a"> <div class="a006_a_check">─</div> </td>
+                    <td>B <input type="text" class="a006_b"> <div class="a006_b_check">─</div> </td>
+                    <td>C <input type="text" class="a006_c"> <div class="a006_c_check">─</div> </td>
+                    <td style="width:245px"><a href="javascriot:void(0)" class="btn_S math_check_btn" style="vertical-align:middle"> check </a> <p  class="size_S">※60秒に一回だけチェックできます</p></td>
+                </tr>
+            </table>
+            <table class="answer_layout">
+                <tr>
+                    <td class="center"><input type="text" id="answer_a006" class="answer_form" value="トルネド"></td>
+                    <td>
+                        <a id="open_a007" class="goto_next_btn" href="javascript:void(0)">答える</a>
+                        <div class="answer_ng">どうやら…違うようです…</div>
+                    </td>
+                </tr>
+            </table>
+            <br>
+        </article>
+
+        <article id="a007">
+            <hr><br>
+            <div style="width:900px;">
+                <img src="./img/escape_game/image_navi.png" width="160">
+                <div class="navi_text">
+                    <div id="text_051">ふむふむ、答えは トルネド ですか……。</div>
+                    <div id="text_052">……あ。</div>
+                    <div id="text_053"> </div>
+                    <div id="text_054">はわわ、大事な資料が舞ってしまいました！ 申し訳ございません……。</div>
+                    <div id="text_055">（またうっかり口にしてしまったべさ……。 ご主人様にバレたらきっと怒られるべ……。）</div>
+                    <div id="text_056"> </div>
+                    <div id="text_057">回転してしまってるメモは、手で押さえれば読めると思います……！</div>
+                    <div id="text_058">大変申し訳ございませんが、なんとか次の手掛かりをつかんでくさい……！</div>
+                    <div id="text_059">（その間に舞ってしまった他の資料とかを片付けて、バレないように隠ぺい工作するべさ……！）</div>
+                </div>
+            </div>
+            <div class="hint_layout">
+                <a class="hint hint_a007_1" href="javascript:void(0)"><div class="hint_icon lock"></div><div class="hint_text">ヒント1 (18:00にアンロック)</div></a><br>
+                <a class="hint hint_a007_2" href="javascript:void(0)"><div class="hint_icon lock"></div><div class="hint_text">ヒント2 (10:00にアンロック)</div></a><br>
+            </div>
+            <br>
+            <div class="layout_box layout_1 ma0a tornade">
+                <img class="drag-and-drop" src="./img/escape_game/a002_1.png" style="width:200px; height:200px; left:320px; top:50px;">
+                <img class="drag-and-drop" src="./img/escape_game/a007.png">
+                <div class="block_layer"></div>
+            </div>
+            <br>
+            <table class="answer_layout">
+                <tr>
+                    <td class="center"><input type="text" id="answer_a007" class="answer_form" value="レビテト"></td>
+                    <td>
+                        <a id="open_a008" class="goto_next_btn" href="javascript:void(0)">答える</a>
+                        <div class="answer_ng">どうやら…違うようです…</div>
+                    </td>
+                </tr>
+            </table>
+            <br>
+        </article>
+
+        <article id="a008">
+            <hr><br>
+            <div style="width:900px;">
+                <img src="./img/escape_game/image_navi.png" width="160">
+                <div class="navi_text">
+                    <div id="text_061">（ふぅ… なんとか片付け終わったべ…… バレたら大目玉くらうところだったべ……）</div>
+                    <div id="text_062"> </div>
+                    <div id="text_063">むむ… レビテト ですか？ 聞きなれない言葉でｓ…… きゃあ！！？？</div>
+                    <div id="text_064">（なんだべ！？ メモが宙に浮かんでしまってるべ！？ まさか「レビテト」って呪文！！？？）</div>
+                    <div id="text_065"> </div>
+                    <div id="text_066">……あれ？ 今の魔法効果によって隠されていたメモが見つかりました！</div>
+                    <div id="text_067">これが大事に隠していたメモだったようです！ これがきっと危険な呪文に違いないです！</div>
+                    <div id="text_068"> </div>
+                    <div id="text_069">さぁ冒険者様！ これが危険な魔法か解読をお願いいたします！</div>
+                </div>
+            </div>
+            <br><br>
+            <div class="layout_box layout_1 ma0a">
+                <img class="drag-and-drop" src="./img/escape_game/a008.png">
+            </div>
+            <div class="layout_box layout_1 ma0a">
+                <img class="drag-and-drop cursor_move" src="./img/escape_game/a008_1.png" style="width:435px; height:276px; top:110px; left:270px">
+                <img class="drag-and-drop cursor_move" src="./img/escape_game/a008_2.png" style="width:517px; height:294px; top:20px;  left:-40px">
+                <img class="drag-and-drop cursor_move" src="./img/escape_game/a008_3.png" style="width:399px; height:270px; top:80px;  left:130px">
+            </div>
+            <br>
+            <table class="answer_layout">
+                <tr>
+                    <td colspan="2" class="center color_red">[!注意!] この問題は、１回しか解答することができません [!注意!]</td>
+                </tr>
+                <tr>
+                    <td class="center"><input type="text" id="answer_a008" class="answer_form" value="アルテマ"></td>
+                    <td>
+                        <a id="open_a009" class="goto_next_btn" href="javascript:void(0)">答える</a>
+                    </td>
+                </tr>
+            </table>
+            <br>
+        </article>
+
+        <article id="a009">
+            <hr><br>
+            <div style="width:900px;">
+                <img src="./img/escape_game/image_navi.png" width="160">
+                <div class="navi_text">
+                    <div id="text_071">ひえー！ これアレだべ！ そりゃもう危険な呪文だべ！？</div>
+                    <div id="text_072"> </div>
+                    <div id="text_073">ｺﾎﾝ… 失礼しました。 取り乱してしまいました。</div>
+                    <div id="text_074">これ以上研究が進む前に黒渦団に通報しておきます！</div>
+                    <div id="text_075"> </div>
+                    <div id="text_076">冒険者様、この度はありがとうございました！</div>
+                    <div id="text_077">未然に危機を防げそうで一安心です！</div>
+                    <div id="text_078"> </div>
+                    <div id="text_079">（本当にこれで良かったんだべか……？）</div>
+                </div>
+            </div>
+            <br>
+            <table class="ma0a">
+                <tr>
+                    <td><img src="./img/escape_game/stamp_050.png" width="200"></td>
+                    <td>
+                        ⇐こちらの画像はDLしてもokです！<br>
+                         スクショの上に重ねてSNSとかに投稿してね٩( 'ω' )و<br>
+                        <Br>
+                         ※サイズ変更可、縦横比変更不可でお願いします<br>
+                        <br>
+                         <a class="link" href="./escape_game_answer.html" target="blank">解答編はコチラ</a><br>
+                        <br>
+                         <p class="tweet_button_1"></p><br>
+                    </td>
+                </tr>
+            </table>
+            <br>
+        </article>
+
+        <article id="a010">
+            <hr><br>
+            <div style="width:900px;">
+                <img src="./img/escape_game/image_navi.png" width="160">
+                <div class="navi_text">
+                    <div id="text_081">え、アパルトメント？ まさか別居があるなんて……！</div>
+                    <div id="text_082"> </div>
+                    <div id="text_083">研究していた呪文は蘇生系魔法だったのですね…！</div>
+                    <div id="text_084">確かに主は攻撃系魔法が得意な方ですが……なるほど……。</div>
+                    <div id="text_085">より幅広く呪文を研究していたということですね。</div>
+                    <div id="text_086"> </div>
+                    <div id="text_087">冒険者様、ありがとうございました！</div>
+                    <div id="text_088">研究していた呪文が危険なものではなくて安心しました。</div>
+                    <div id="text_089">（しかし残ったあの意味深な暗号はなんだったんだべ……。）</div>
+                </div>
+            </div>
+            <br>
+            <table class="ma0a">
+                <tr>
+                    <td><img src="./img/escape_game/stamp_080.png" width="200"></td>
+                    <td>
+                        ⇐こちらの画像はDLしてもokです！<br>
+                         スクショの上に重ねてSNSとかに投稿してね٩( 'ω' )و<br>
+                        <Br>
+                         ※サイズ変更可、縦横比変更不可でお願いします<br>
+                        <br>
+                         <a class="link" href="./escape_game_answer.html" target="blank">解答編はコチラ</a><br>
+                        <br>
+                         <p class="tweet_button_1"></p><br>
+                    </td>
+                </tr>
+            </table>
+            <br>
+        </article>
+
+        <article id="a011">
+            <hr><br>
+            <div style="width:900px;">
+                <img src="./img/escape_game/image_navi.png" width="160">
+                <div class="navi_text">
+                    <div id="text_091">え、アパルトメント？ まさか別居があるなんて……！</div>
+                    <div id="text_092">え、全てのメモ用紙がさらなる暗号に……！？</div>
+                    <div id="text_093"> </div>
+                    <div id="text_094">ひゃー、さすが冒険者様だべ！ すべての謎を解き明かしてしまうなんて！</div>
+                    <div id="text_095"> </div>
+                    <div id="text_096">主が研究していた呪文も蘇生系魔法だったので安心しました！</div>
+                    <div id="text_097">バレないように後片付けは私にお任せください！</div>
+                    <div id="text_098"> </div>
+                    <div id="text_099">また機会があれば、謎解明の依頼を出させていただきますね！</div>
+                </div>
+            </div>
+            <br>
+            <table class="ma0a">
+                <tr>
+                    <td><img src="./img/escape_game/stamp_100.png" width="200"></td>
+                    <td>
+                        ⇐こちらの画像はDLしてもokです！<br>
+                         スクショの上に重ねてSNSとかに投稿してね٩( 'ω' )و<br>
+                        <Br>
+                         ※サイズ変更可、縦横比変更不可でお願いします<br>
+                        <br>
+                         <a class="link" href="./escape_game_answer.html" target="blank">解答編はコチラ</a><br>
+                        <br>
+                         <p class="tweet_button_1"></p><br>
+                    </td>
+                </tr>
+            </table>
+            <br>
+        </article>
+
+        <article id="a012">
+            <div style="width:900px;">
+                <img src="./img/escape_game/image_navi.png" width="160">
+                <div class="navi_text">
+                    <div id="text_101">残念ながら時間切れです……。</div>
+                    <div id="text_102">主が帰ってくる時間となってしまいました……。</div>
+                    <div id="text_103"> </div>
+                    <div id="text_104">また機会を伺って、挑戦してくださいね！</div>
+                </div>
+            </div>
+            <br>
+            <table class="ma0a">
+                <tr>
+                    <td><img src="./img/escape_game/stamp_000.png" width="200"></td>
+                    <td>
+                        ⇐こちらの画像はDLしてもokです！<br>
+                         スクショの上に重ねてSNSとかに投稿してね٩( 'ω' )و<br>
+                        <Br>
+                         ※サイズ変更可、縦横比変更不可でお願いします<br>
+                        <br>
+                         <a class="link" href="./escape_game_answer.html" target="blank">解答編はコチラ</a><br>
+                        <br>
+                         <p class="tweet_button_2"></p><br>
+                    </td>
+                </tr>
+            </table>
+            <br>
+        </article>
+
+        <article id="a013">
+            <div style="width:900px;">
+                <img src="./img/escape_game/image_navi.png" width="160">
+                <div class="navi_text">
+                    <div id="text_111">残念ながら解答が間違っていたみたいです……。</div>
+                    <div id="text_112">呪文の謎を解くには至りませんでした……。</div>
+                    <div id="text_113"> </div>
+                    <div id="text_114">また機会を伺って、挑戦してくださいね！</div>
+                </div>
+            </div>
+            <br>
+            <table class="ma0a">
+                <tr>
+                    <td><img src="./img/escape_game/stamp_000.png" width="200"></td>
+                    <td>
+                        ⇐こちらの画像はDLしてもokです！<br>
+                         スクショの上に重ねてSNSとかに投稿してね٩( 'ω' )و<br>
+                        <Br>
+                         ※サイズ変更可、縦横比変更不可でお願いします<br>
+                        <br>
+                         <a class="link" href="./escape_game_answer.html" target="blank">解答編はコチラ</a><br>
+                        <br>
+                         <p class="tweet_button_2"></p><br>
+                    </td>
+                </tr>
+            </table>
+            <br>
+        </article>
+
+    </div>
+
+    <div id="footer">
+        <!-- jsにより生成 -->
+    </div>
+
+</div>
+</body>
+</html>
